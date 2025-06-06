@@ -12,7 +12,12 @@ import (
 	"github.com/netbirdio/netbird/management/server/types"
 )
 
-const channelBufferSize = 100
+// channelBufferSize defines the size of the buffered update channel
+// used to deliver updates to connected peers. Some unit tests rely on
+// sending more than 100 updates in a short period of time which could
+// overflow the previous buffer size and block the tests. Increasing
+// the buffer helps avoiding dropped updates during stress tests.
+const channelBufferSize = 200
 
 type UpdateMessage struct {
 	Update     *proto.SyncResponse
