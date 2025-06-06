@@ -571,7 +571,7 @@ func (am *DefaultAccountManager) AddPeer(ctx context.Context, setupKey, userID s
 			Name:                        peer.Meta.Hostname,
 			DNSLabel:                    freeLabel,
 			UserID:                      userID,
-			Status:                      &nbpeer.PeerStatus{Connected: false, LastSeen: registrationTime},
+			Status:                      &nbpeer.PeerStatus{Connected: false, LastSeen: registrationTime, RequiresApproval: true},
 			SSHEnabled:                  false,
 			SSHKey:                      peer.SSHKey,
 			LastLogin:                   &registrationTime,
@@ -669,7 +669,7 @@ func (am *DefaultAccountManager) AddPeer(ctx context.Context, setupKey, userID s
 		am.BufferUpdateAccountPeers(ctx, accountID)
 	}
 
-	return am.getValidatedPeerWithMap(ctx, false, accountID, newPeer)
+	return am.getValidatedPeerWithMap(ctx, true, accountID, newPeer)
 }
 
 func getFreeIP(ctx context.Context, transaction store.Store, accountID string) (net.IP, error) {

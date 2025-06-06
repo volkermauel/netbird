@@ -99,6 +99,18 @@ export NETBIRD_DOMAIN=netbird.example.com; curl -fsSL https://github.com/netbird
 ```
 - Once finished, you can manage the resources via `docker-compose`
 
+### Approving peers
+
+By default, newly enrolled peers require approval from an administrator before
+they receive the network configuration. You can approve a peer via the
+management API using the helper script:
+
+```bash
+./scripts/approve_peer.sh <PEER_ID> <API_TOKEN> [API_URL]
+```
+
+`API_URL` defaults to `http://localhost:33073` when omitted.
+
 ### A bit on NetBird internals
 -  Every machine in the network runs [NetBird Agent (or Client)](client/) that manages WireGuard.
 -  Every agent connects to [Management Service](management/) that holds network state, manages peer IPs, and distributes network updates to agents (peers).
