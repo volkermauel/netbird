@@ -43,6 +43,7 @@ func AddEndpoints(networksManager networks.Manager, resourceManager resources.Ma
 	router.HandleFunc("/networks/{networkId}", networksHandler.getNetwork).Methods("GET", "OPTIONS")
 	router.HandleFunc("/networks/{networkId}", networksHandler.updateNetwork).Methods("PUT", "OPTIONS")
 	router.HandleFunc("/networks/{networkId}", networksHandler.deleteNetwork).Methods("DELETE", "OPTIONS")
+	router.HandleFunc("/networks/{networkId}/topology", networksHandler.getNetworkTopology).Methods("GET", "OPTIONS")
 }
 
 func newHandler(networksManager networks.Manager, resourceManager resources.Manager, routerManager routers.Manager, groupsManager groups.Manager, accountManager account.Manager) *handler {
@@ -243,6 +244,82 @@ func (h *handler) deleteNetwork(w http.ResponseWriter, r *http.Request) {
 	}
 
 	util.WriteJSONObject(r.Context(), w, util.EmptyObject{})
+}
+
+func (h *handler) getNetworkTopology(w http.ResponseWriter, r *http.Request) {
+	userAuth, err := nbcontext.GetUserAuthFromContext(r.Context())
+	if err != nil {
+		util.WriteError(r.Context(), err, w)
+		return
+	}
+
+	accountID, userID := userAuth.AccountId, userAuth.UserId
+	networkID := mux.Vars(r)["networkId"]
+
+	network, err := h.networksManager.GetNetwork(r.Context(), accountID, userID, networkID)
+	if err != nil {
+		util.WriteError(r.Context(), err, w)
+		return
+	}
+
+	resources, err := h.resourceManager.GetAllResourcesInNetwork(r.Context(), accountID, userID, networkID)
+	if err != nil {
+		util.WriteError(r.Context(), err, w)
+		return
+	}
+
+	routers, err := h.routerManager.GetAllRoutersInNetwork(r.Context(), accountID, userID, networkID)
+	if err != nil {
+		util.WriteError(r.Context(), err, w)
+		return
+	}
+
+	groupsMap, err := h.groupsManager.GetAllGroupsMap(r.Context(), accountID, userID)
+	if err != nil {
+		util.WriteError(r.Context(), err, w)
+		return
+	}
+
+	nodes := []api.TopologyNode{{Id: "network:" + network.ID, Label: network.Name, Type: "network"}}
+	edges := []api.TopologyEdge{}
+
+	for _, res := range resources {
+		resID := "resource:" + res.ID
+		nodes = append(nodes, api.TopologyNode{Id: resID, Label: res.Name, Type: "resource"})
+		edges = append(edges, api.TopologyEdge{Source: "network:" + network.ID, Target: resID, Type: "contains"})
+		for _, gid := range res.GroupIDs {
+			if g, ok := groupsMap[gid]; ok {
+				groupID := "group:" + g.ID
+				nodes = append(nodes, api.TopologyNode{Id: groupID, Label: g.Name, Type: "group"})
+				edges = append(edges, api.TopologyEdge{Source: groupID, Target: resID, Type: "access"})
+			}
+		}
+	}
+
+	for _, router := range routers {
+		routerID := "router:" + router.ID
+		nodes = append(nodes, api.TopologyNode{Id: routerID, Label: router.ID, Type: "router"})
+		edges = append(edges, api.TopologyEdge{Source: "network:" + network.ID, Target: routerID, Type: "router"})
+
+		if router.Peer != "" {
+			peer, err := h.accountManager.GetPeer(r.Context(), accountID, router.Peer, userID)
+			if err == nil {
+				pid := "peer:" + peer.ID
+				nodes = append(nodes, api.TopologyNode{Id: pid, Label: peer.Name, Type: "peer"})
+				edges = append(edges, api.TopologyEdge{Source: routerID, Target: pid, Type: "host"})
+			}
+		}
+
+		for _, gid := range router.PeerGroups {
+			if g, ok := groupsMap[gid]; ok {
+				groupID := "group:" + g.ID
+				nodes = append(nodes, api.TopologyNode{Id: groupID, Label: g.Name, Type: "group"})
+				edges = append(edges, api.TopologyEdge{Source: routerID, Target: groupID, Type: "host_group"})
+			}
+		}
+	}
+
+	util.WriteJSONObject(r.Context(), w, api.NetworkTopology{Nodes: nodes, Edges: edges})
 }
 
 func (h *handler) collectIDsInNetwork(ctx context.Context, accountID, userID, networkID string) ([]string, []string, int, error) {
