@@ -93,5 +93,9 @@ func (e *ExtraSettings) Copy() *ExtraSettings {
 	return &ExtraSettings{
 		PeerApprovalEnabled:       e.PeerApprovalEnabled,
 		IntegratedValidatorGroups: append(cpGroup, e.IntegratedValidatorGroups...),
+		FlowEnabled:               e.FlowEnabled,
+		FlowPacketCounterEnabled:  e.FlowPacketCounterEnabled,
+		FlowENCollectionEnabled:   e.FlowENCollectionEnabled,
+		FlowDnsCollectionEnabled:  e.FlowDnsCollectionEnabled,
 	}
 }

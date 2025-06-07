@@ -31,6 +31,12 @@
         "Username": "",
         "Password": null
     },
+    "Flow": {
+        "URL": "https://flow.netbird.io:443",
+        "Interval": "10s",
+        "TokenPayload": "",
+        "TokenSignature": ""
+    },
     "DataDir": "",
     "HttpConfig": {
         "LetsEncryptDomain": "<PASTE YOUR LET'S ENCRYPT DOMAIN HERE>",

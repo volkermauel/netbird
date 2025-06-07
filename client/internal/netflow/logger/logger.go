@@ -14,6 +14,7 @@ import (
 	"github.com/netbirdio/netbird/client/internal/netflow/store"
 	"github.com/netbirdio/netbird/client/internal/netflow/types"
 	"github.com/netbirdio/netbird/client/internal/peer"
+	"github.com/netbirdio/netbird/client/internal/statemanager"
 )
 
 type rcvChan chan *types.EventFields
@@ -29,11 +30,19 @@ type Logger struct {
 	Store              types.Store
 }
 
-func New(statusRecorder *peer.Status, wgIfaceIPNet netip.Prefix) *Logger {
+func New(statusRecorder *peer.Status, wgIfaceIPNet netip.Prefix, mgr *statemanager.Manager) *Logger {
+	var st types.Store
+	var err error
+	st, err = store.NewStateStore(mgr)
+	if err != nil {
+		log.Warnf("failed to init persistent flow store: %v", err)
+		st = store.NewMemoryStore()
+	}
+
 	return &Logger{
 		statusRecorder: statusRecorder,
 		wgIfaceNet:     wgIfaceIPNet,
-		Store:          store.NewMemoryStore(),
+		Store:          st,
 	}
 }
 

@@ -39,6 +39,8 @@ type Config struct {
 	Relay      *Relay
 	Signal     *Host
 
+	Flow *FlowServerConfig
+
 	Datadir                string
 	DataStoreEncryptionKey string
 
@@ -185,4 +187,12 @@ type ReverseProxy struct {
 	// request headers if the peer's address falls within one of these
 	// trusted IP prefixes.
 	TrustedPeers []netip.Prefix
+}
+
+// FlowServerConfig represents configuration for the traffic flow receiver
+type FlowServerConfig struct {
+	URL            string
+	TokenPayload   string
+	TokenSignature string
+	Interval       util.Duration
 }
