@@ -24,7 +24,7 @@ import (
 )
 
 var logger = log.NewFromLogrus(logrus.StandardLogger())
-var flowLogger = netflow.NewManager(nil, []byte{}, nil).GetLogger()
+var flowLogger = netflow.NewManager(nil, []byte{}, nil, nil).GetLogger()
 
 type IFaceMock struct {
 	SetFilterFunc   func(device.PacketFilter) error

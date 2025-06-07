@@ -11,7 +11,7 @@ import (
 )
 
 var logger = log.NewFromLogrus(logrus.StandardLogger())
-var flowLogger = netflow.NewManager(nil, []byte{}, nil).GetLogger()
+var flowLogger = netflow.NewManager(nil, []byte{}, nil, nil).GetLogger()
 
 // Memory pressure tests
 func BenchmarkMemoryPressure(b *testing.B) {

@@ -17,6 +17,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/peer"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/durationpb"
 
 	integrationsConfig "github.com/netbirdio/management-integrations/integrations/config"
 
@@ -622,11 +623,28 @@ func toNetbirdConfig(config *types.Config, turnCredentials *Token, relayToken *T
 		}
 	}
 
+	var flowCfg *proto.FlowConfig
+	if config.Flow != nil {
+		flowCfg = &proto.FlowConfig{
+			Url:            config.Flow.URL,
+			TokenPayload:   config.Flow.TokenPayload,
+			TokenSignature: config.Flow.TokenSignature,
+			Interval:       durationpb.New(config.Flow.Interval.Duration),
+		}
+		if extraSettings != nil {
+			flowCfg.Enabled = extraSettings.FlowEnabled
+			flowCfg.Counters = extraSettings.FlowPacketCounterEnabled
+			flowCfg.ExitNodeCollection = extraSettings.FlowENCollectionEnabled
+			flowCfg.DnsCollection = extraSettings.FlowDnsCollectionEnabled
+		}
+	}
+
 	nbConfig := &proto.NetbirdConfig{
 		Stuns:  stuns,
 		Turns:  turns,
 		Signal: signalCfg,
 		Relay:  relayCfg,
+		Flow:   flowCfg,
 	}
 
 	return nbConfig
