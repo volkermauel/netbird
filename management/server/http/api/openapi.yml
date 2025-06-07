@@ -1495,6 +1495,58 @@ components:
           required:
             - id
         - $ref: '#/components/schemas/NetworkRouterRequest'
+    TopologyNode:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique node identifier
+          example: network:123
+        label:
+          type: string
+          description: Human friendly node label
+          example: My Router
+        type:
+          type: string
+          description: Node type
+          example: router
+      required:
+        - id
+        - label
+        - type
+    TopologyEdge:
+      type: object
+      properties:
+        source:
+          type: string
+          description: Source node ID
+          example: network:123
+        target:
+          type: string
+          description: Target node ID
+          example: router:abc
+        type:
+          type: string
+          description: Edge type
+          example: connects
+      required:
+        - source
+        - target
+        - type
+    NetworkTopology:
+      type: object
+      properties:
+        nodes:
+          type: array
+          items:
+            $ref: '#/components/schemas/TopologyNode'
+        edges:
+          type: array
+          items:
+            $ref: '#/components/schemas/TopologyEdge'
+      required:
+        - nodes
+        - edges
     Nameserver:
       type: object
       properties:
@@ -3951,6 +4003,36 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/NetworkRouter'
+        '400':
+          "$ref": "#/components/responses/bad_request"
+        '401':
+          "$ref": "#/components/responses/requires_authentication"
+        '403':
+          "$ref": "#/components/responses/forbidden"
+        '500':
+          "$ref": "#/components/responses/internal_error"
+  /api/networks/{networkId}/topology:
+    get:
+      summary: Retrieve Network Topology
+      description: Returns a network topology graph
+      tags: [ Networks ]
+      security:
+        - BearerAuth: [ ]
+        - TokenAuth: [ ]
+      parameters:
+        - in: path
+          name: networkId
+          required: true
+          schema:
+            type: string
+          description: The unique identifier of a network
+      responses:
+        '200':
+          description: Network topology graph
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NetworkTopology'
         '400':
           "$ref": "#/components/responses/bad_request"
         '401':
