@@ -166,12 +166,12 @@ func TestUpdateDNSServer(t *testing.T) {
 				generateDummyHandler("netbird.io", nameServers).ID(): handlerWrapper{
 					domain:   "netbird.io",
 					handler:  dummyHandler,
-					priority: PriorityMatchDomain,
+					priority: PriorityUpstream,
 				},
 				dummyHandler.ID(): handlerWrapper{
 					domain:   "netbird.cloud",
 					handler:  dummyHandler,
-					priority: PriorityMatchDomain,
+					priority: PriorityLocal,
 				},
 				generateDummyHandler(".", nameServers).ID(): handlerWrapper{
 					domain:   nbdns.RootZone,
@@ -188,7 +188,7 @@ func TestUpdateDNSServer(t *testing.T) {
 				generateDummyHandler(zoneRecords[0].Name, nameServers).ID(): handlerWrapper{
 					domain:   "netbird.cloud",
 					handler:  dummyHandler,
-					priority: PriorityMatchDomain,
+					priority: PriorityUpstream,
 				},
 			},
 			initSerial:  0,
@@ -212,12 +212,12 @@ func TestUpdateDNSServer(t *testing.T) {
 				generateDummyHandler("netbird.io", nameServers).ID(): handlerWrapper{
 					domain:   "netbird.io",
 					handler:  dummyHandler,
-					priority: PriorityMatchDomain,
+					priority: PriorityUpstream,
 				},
 				"local-resolver": handlerWrapper{
 					domain:   "netbird.cloud",
 					handler:  dummyHandler,
-					priority: PriorityMatchDomain,
+					priority: PriorityLocal,
 				},
 			},
 			expectedLocalQs: []dns.Question{{Name: zoneRecords[0].Name, Qtype: 1, Qclass: 1}},
@@ -307,7 +307,7 @@ func TestUpdateDNSServer(t *testing.T) {
 				generateDummyHandler(zoneRecords[0].Name, nameServers).ID(): handlerWrapper{
 					domain:   zoneRecords[0].Name,
 					handler:  dummyHandler,
-					priority: PriorityMatchDomain,
+					priority: PriorityUpstream,
 				},
 			},
 			initSerial:          0,
@@ -323,7 +323,7 @@ func TestUpdateDNSServer(t *testing.T) {
 				generateDummyHandler(zoneRecords[0].Name, nameServers).ID(): handlerWrapper{
 					domain:   zoneRecords[0].Name,
 					handler:  dummyHandler,
-					priority: PriorityMatchDomain,
+					priority: PriorityUpstream,
 				},
 			},
 			initSerial:          0,
@@ -497,7 +497,7 @@ func TestDNSFakeResolverHandleUpdates(t *testing.T) {
 		"id1": handlerWrapper{
 			domain:   zoneRecords[0].Name,
 			handler:  &local.Resolver{},
-			priority: PriorityMatchDomain,
+			priority: PriorityUpstream,
 		},
 	}
 	//dnsServer.localResolver.RegisteredMap = local.RegistrationMap{local.BuildRecordKey("netbird.cloud", dns.ClassINET, dns.TypeA): struct{}{}}
@@ -980,7 +980,7 @@ func TestHandlerChain_DomainPriorities(t *testing.T) {
 	}
 
 	chain.AddHandler("example.com.", dnsRouteHandler, PriorityDNSRoute)
-	chain.AddHandler("example.com.", upstreamHandler, PriorityMatchDomain)
+	chain.AddHandler("example.com.", upstreamHandler, PriorityUpstream)
 
 	testCases := []struct {
 		name            string
@@ -1061,14 +1061,14 @@ func TestDefaultServer_UpdateMux(t *testing.T) {
 			handler: &mockHandler{
 				Id: "upstream-group1",
 			},
-			priority: PriorityMatchDomain,
+			priority: PriorityUpstream,
 		},
 		"upstream-group2": {
 			domain: "example.com",
 			handler: &mockHandler{
 				Id: "upstream-group2",
 			},
-			priority: PriorityMatchDomain - 1,
+			priority: PriorityUpstream - 1,
 		},
 	}
 
@@ -1095,21 +1095,21 @@ func TestDefaultServer_UpdateMux(t *testing.T) {
 			handler: &mockHandler{
 				Id: "upstream-group1",
 			},
-			priority: PriorityMatchDomain,
+			priority: PriorityUpstream,
 		},
 		"upstream-group2": {
 			domain: "example.com",
 			handler: &mockHandler{
 				Id: "upstream-group2",
 			},
-			priority: PriorityMatchDomain - 1,
+			priority: PriorityUpstream - 1,
 		},
 		"upstream-other": {
 			domain: "other.com",
 			handler: &mockHandler{
 				Id: "upstream-other",
 			},
-			priority: PriorityMatchDomain,
+			priority: PriorityUpstream,
 		},
 	}
 
@@ -1130,7 +1130,7 @@ func TestDefaultServer_UpdateMux(t *testing.T) {
 					handler: &mockHandler{
 						Id: "upstream-group2",
 					},
-					priority: PriorityMatchDomain - 1,
+					priority: PriorityUpstream - 1,
 				},
 			},
 			expectedHandlers: map[string]string{
@@ -1148,7 +1148,7 @@ func TestDefaultServer_UpdateMux(t *testing.T) {
 					handler: &mockHandler{
 						Id: "upstream-group1",
 					},
-					priority: PriorityMatchDomain,
+					priority: PriorityUpstream,
 				},
 			},
 			expectedHandlers: map[string]string{
@@ -1166,7 +1166,7 @@ func TestDefaultServer_UpdateMux(t *testing.T) {
 					handler: &mockHandler{
 						Id: "upstream-group3",
 					},
-					priority: PriorityMatchDomain + 1,
+					priority: PriorityUpstream + 1,
 				},
 				// Keep existing groups with their original priorities
 				{
@@ -1174,14 +1174,14 @@ func TestDefaultServer_UpdateMux(t *testing.T) {
 					handler: &mockHandler{
 						Id: "upstream-group1",
 					},
-					priority: PriorityMatchDomain,
+					priority: PriorityUpstream,
 				},
 				{
 					domain: "example.com",
 					handler: &mockHandler{
 						Id: "upstream-group2",
 					},
-					priority: PriorityMatchDomain - 1,
+					priority: PriorityUpstream - 1,
 				},
 			},
 			expectedHandlers: map[string]string{
@@ -1201,14 +1201,14 @@ func TestDefaultServer_UpdateMux(t *testing.T) {
 					handler: &mockHandler{
 						Id: "upstream-group1",
 					},
-					priority: PriorityMatchDomain,
+					priority: PriorityUpstream,
 				},
 				{
 					domain: "example.com",
 					handler: &mockHandler{
 						Id: "upstream-group2",
 					},
-					priority: PriorityMatchDomain - 1,
+					priority: PriorityUpstream - 1,
 				},
 				// Add group3 with lowest priority
 				{
@@ -1216,7 +1216,7 @@ func TestDefaultServer_UpdateMux(t *testing.T) {
 					handler: &mockHandler{
 						Id: "upstream-group3",
 					},
-					priority: PriorityMatchDomain - 2,
+					priority: PriorityUpstream - 2,
 				},
 			},
 			expectedHandlers: map[string]string{
@@ -1337,14 +1337,14 @@ func TestDefaultServer_UpdateMux(t *testing.T) {
 					handler: &mockHandler{
 						Id: "upstream-group1",
 					},
-					priority: PriorityMatchDomain,
+					priority: PriorityUpstream,
 				},
 				{
 					domain: "other.com",
 					handler: &mockHandler{
 						Id: "upstream-other",
 					},
-					priority: PriorityMatchDomain,
+					priority: PriorityUpstream,
 				},
 			},
 			expectedHandlers: map[string]string{
@@ -1362,28 +1362,28 @@ func TestDefaultServer_UpdateMux(t *testing.T) {
 					handler: &mockHandler{
 						Id: "upstream-group1",
 					},
-					priority: PriorityMatchDomain,
+					priority: PriorityUpstream,
 				},
 				{
 					domain: "example.com",
 					handler: &mockHandler{
 						Id: "upstream-group2",
 					},
-					priority: PriorityMatchDomain - 1,
+					priority: PriorityUpstream - 1,
 				},
 				{
 					domain: "other.com",
 					handler: &mockHandler{
 						Id: "upstream-other",
 					},
-					priority: PriorityMatchDomain,
+					priority: PriorityUpstream,
 				},
 				{
 					domain: "new.com",
 					handler: &mockHandler{
 						Id: "upstream-new",
 					},
-					priority: PriorityMatchDomain,
+					priority: PriorityUpstream,
 				},
 			},
 			expectedHandlers: map[string]string{
@@ -1793,14 +1793,14 @@ func TestExtraDomainsRefCounting(t *testing.T) {
 
 	// Register domains from different handlers with same domain
 	server.RegisterHandler(domain.List{"*.shared.example.com"}, &MockHandler{}, PriorityDNSRoute)
-	server.RegisterHandler(domain.List{"shared.example.com."}, &MockHandler{}, PriorityMatchDomain)
+	server.RegisterHandler(domain.List{"shared.example.com."}, &MockHandler{}, PriorityUpstream)
 
 	// Verify refcount is 2
 	zoneKey := toZone("shared.example.com")
 	assert.Equal(t, 2, server.extraDomains[zoneKey], "Refcount should be 2 after registering same domain twice")
 
 	// Deregister one handler
-	server.DeregisterHandler(domain.List{"shared.example.com"}, PriorityMatchDomain)
+	server.DeregisterHandler(domain.List{"shared.example.com"}, PriorityUpstream)
 
 	// Verify refcount is 1
 	assert.Equal(t, 1, server.extraDomains[zoneKey], "Refcount should be 1 after deregistering one handler")
@@ -1927,7 +1927,7 @@ func TestDomainCaseHandling(t *testing.T) {
 	}
 
 	server.RegisterHandler(domain.List{"MIXED.example.com"}, &MockHandler{}, PriorityDefault)
-	server.RegisterHandler(domain.List{"mixed.EXAMPLE.com"}, &MockHandler{}, PriorityMatchDomain)
+	server.RegisterHandler(domain.List{"mixed.EXAMPLE.com"}, &MockHandler{}, PriorityUpstream)
 
 	assert.Equal(t, 1, len(server.extraDomains), "Case differences should be normalized")
 
@@ -1946,4 +1946,112 @@ func TestDomainCaseHandling(t *testing.T) {
 	}
 	assert.Contains(t, domains, "config.example.com.", "Mixed case domain should be normalized and pre.sent")
 	assert.Contains(t, domains, "mixed.example.com.", "Mixed case domain should be normalized and present")
+}
+
+func TestLocalResolverPriorityInServer(t *testing.T) {
+	server := &DefaultServer{
+		ctx:           context.Background(),
+		wgInterface:   &mocWGIface{},
+		handlerChain:  NewHandlerChain(),
+		localResolver: local.NewResolver(),
+		service:       &mockService{},
+		extraDomains:  make(map[domain.Domain]int),
+	}
+
+	config := nbdns.Config{
+		ServiceEnable: true,
+		CustomZones: []nbdns.CustomZone{
+			{
+				Domain: "local.example.com",
+				Records: []nbdns.SimpleRecord{
+					{
+						Name:  "test.local.example.com",
+						Type:  int(dns.TypeA),
+						Class: nbdns.DefaultClass,
+						TTL:   300,
+						RData: "192.168.1.100",
+					},
+				},
+			},
+		},
+		NameServerGroups: []*nbdns.NameServerGroup{
+			{
+				Domains: []string{"local.example.com"}, // Same domain as local records
+				NameServers: []nbdns.NameServer{
+					{
+						IP:     netip.MustParseAddr("8.8.8.8"),
+						NSType: nbdns.UDPNameServerType,
+						Port:   53,
+					},
+				},
+			},
+		},
+	}
+
+	localMuxUpdates, _, err := server.buildLocalHandlerUpdate(config.CustomZones)
+	assert.NoError(t, err)
+
+	upstreamMuxUpdates, err := server.buildUpstreamHandlerUpdate(config.NameServerGroups)
+	assert.NoError(t, err)
+
+	// Verify that local handler has higher priority than upstream for same domain
+	var localPriority, upstreamPriority int
+	localFound, upstreamFound := false, false
+
+	for _, update := range localMuxUpdates {
+		if update.domain == "local.example.com" {
+			localPriority = update.priority
+			localFound = true
+		}
+	}
+
+	for _, update := range upstreamMuxUpdates {
+		if update.domain == "local.example.com" {
+			upstreamPriority = update.priority
+			upstreamFound = true
+		}
+	}
+
+	assert.True(t, localFound, "Local handler should be found")
+	assert.True(t, upstreamFound, "Upstream handler should be found")
+	assert.Greater(t, localPriority, upstreamPriority,
+		"Local handler priority (%d) should be higher than upstream priority (%d)",
+		localPriority, upstreamPriority)
+	assert.Equal(t, PriorityLocal, localPriority, "Local handler should use PriorityLocal")
+	assert.Equal(t, PriorityUpstream, upstreamPriority, "Upstream handler should use PriorityUpstream")
+}
+
+func TestLocalResolverPriorityConstants(t *testing.T) {
+	// Test that priority constants are ordered correctly
+	assert.Greater(t, PriorityLocal, PriorityDNSRoute, "Local priority should be higher than DNS route")
+	assert.Greater(t, PriorityLocal, PriorityUpstream, "Local priority should be higher than upstream")
+	assert.Greater(t, PriorityUpstream, PriorityDefault, "Upstream priority should be higher than default")
+
+	// Test that local resolver uses the correct priority
+	server := &DefaultServer{
+		localResolver: local.NewResolver(),
+	}
+
+	config := nbdns.Config{
+		CustomZones: []nbdns.CustomZone{
+			{
+				Domain: "local.example.com",
+				Records: []nbdns.SimpleRecord{
+					{
+						Name:  "test.local.example.com",
+						Type:  int(dns.TypeA),
+						Class: nbdns.DefaultClass,
+						TTL:   300,
+						RData: "192.168.1.100",
+					},
+				},
+			},
+		},
+	}
+
+	localMuxUpdates, _, err := server.buildLocalHandlerUpdate(config.CustomZones)
+	assert.NoError(t, err)
+	assert.Len(t, localMuxUpdates, 1)
+	assert.Equal(t, PriorityLocal, localMuxUpdates[0].priority, "Local handler should use PriorityLocal")
+	assert.Equal(t, "local.example.com", localMuxUpdates[0].domain)
 }
