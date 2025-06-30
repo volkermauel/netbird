@@ -51,11 +51,18 @@ jobs:
 
       - name: Install dependencies
         if: steps.cache.outputs.cache-hit != 'true'
-        run: sudo apt update && sudo apt install -y -q libgtk-3-dev libayatana-appindicator3-dev libgl1-mesa-dev xorg-dev gcc-multilib libpcap-dev
+        run: |
+          sudo dpkg --configure -a
+          sudo apt update
+          sudo apt install -y -q libgtk-3-dev libayatana-appindicator3-dev libgl1-mesa-dev xorg-dev gcc-multilib libpcap-dev
 
       - name: Install 32-bit libpcap
         if: steps.cache.outputs.cache-hit != 'true'
-        run: sudo dpkg --add-architecture i386 && sudo apt update && sudo apt-get install -y libpcap0.8-dev:i386
+        run: |
+          sudo dpkg --configure -a
+          sudo dpkg --add-architecture i386
+          sudo apt update
+          sudo apt-get install -y libpcap0.8-dev:i386
 
       - name: Build client
         if: steps.cache.outputs.cache-hit != 'true'
@@ -131,11 +138,18 @@ jobs:
             ${{ runner.os }}-gotest-cache-
 
       - name: Install dependencies
-        run: sudo apt update && sudo apt install -y -q libgtk-3-dev libayatana-appindicator3-dev libgl1-mesa-dev xorg-dev gcc-multilib libpcap-dev
+        run: |
+          sudo dpkg --configure -a
+          sudo apt update
+          sudo apt install -y -q libgtk-3-dev libayatana-appindicator3-dev libgl1-mesa-dev xorg-dev gcc-multilib libpcap-dev
 
       - name: Install 32-bit libpcap
         if: matrix.arch == '386'
-        run: sudo dpkg --add-architecture i386 && sudo apt update && sudo apt-get install -y libpcap0.8-dev:i386
+        run: |
+          sudo dpkg --configure -a
+          sudo dpkg --add-architecture i386
+          sudo apt update
+          sudo apt-get install -y libpcap0.8-dev:i386
 
       - name: Install modules
         run: go mod tidy
@@ -225,7 +239,10 @@ jobs:
 
       - name: Install dependencies
         if: steps.cache.outputs.cache-hit != 'true'
-        run: sudo apt update && sudo apt install -y gcc-multilib g++-multilib libc6-dev-i386
+        run: |
+          sudo dpkg --configure -a
+          sudo apt update
+          sudo apt install -y gcc-multilib g++-multilib libc6-dev-i386
 
       - name: Get Go environment
         run: |
@@ -275,7 +292,10 @@ jobs:
 
       - name: Install dependencies
         if: steps.cache.outputs.cache-hit != 'true'
-        run: sudo apt update && sudo apt install -y gcc-multilib g++-multilib libc6-dev-i386
+        run: |
+          sudo dpkg --configure -a
+          sudo apt update
+          sudo apt install -y gcc-multilib g++-multilib libc6-dev-i386
 
       - name: Get Go environment
         run: |
