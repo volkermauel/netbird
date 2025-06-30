@@ -188,7 +188,7 @@ jobs:
           docker run --rm \
             --cap-add=NET_ADMIN \
             --privileged \
-            -v $PWD:/app \
+            -v "$(pwd)":/app \
             -w /app \
             -v "${HOST_GOCACHE}:${CONTAINER_GOCACHE}" \
             -v "${HOST_GOMODCACHE}:${CONTAINER_GOMODCACHE}" \
