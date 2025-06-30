@@ -161,7 +161,7 @@ var (
 				return err
 			}
 
-			integrationMetrics, err := integrations.InitIntegrationMetrics(ctx, appMetrics)
+			integrationMetrics, err := extintegrations.InitIntegrationMetrics(ctx, appMetrics)
 			if err != nil {
 				return err
 			}
@@ -183,7 +183,7 @@ var (
 			if disableSingleAccMode {
 				mgmtSingleAccModeDomain = ""
 			}
-			eventStore, key, err := integrations.InitEventStore(ctx, config.Datadir, config.DataStoreEncryptionKey, integrationMetrics)
+			eventStore, key, err := extintegrations.InitEventStore(ctx, config.Datadir, config.DataStoreEncryptionKey, integrationMetrics)
 			if err != nil {
 				return fmt.Errorf("failed to initialize database: %s", err)
 			}
