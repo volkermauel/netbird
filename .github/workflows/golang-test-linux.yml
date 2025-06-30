@@ -438,7 +438,7 @@ jobs:
     runs-on: [self-hosted, linux]
     steps:
       - name: Create Docker network
-        run: docker network create promnet
+        run: docker network inspect promnet >/dev/null 2>&1 || docker network create promnet
 
       - name: Start Prometheus Pushgateway
         run: docker run -d --name pushgateway --network promnet -p 9091:9091 prom/pushgateway
