@@ -19,7 +19,6 @@ jobs:
     steps:        
       - name: Checkout code
         uses: actions/checkout@v4
-
       - uses: dorny/paths-filter@v3
         id: filter
         with:
@@ -223,6 +222,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Fix interrupted apt
+        run: sudo dpkg --configure -a
+
       - name: Install dependencies
         if: steps.cache.outputs.cache-hit != 'true'
         run: sudo apt update && sudo apt install -y gcc-multilib g++-multilib libc6-dev-i386
@@ -272,6 +274,9 @@ jobs:
 
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Fix interrupted apt
+        run: sudo dpkg --configure -a
 
       - name: Install dependencies
         if: steps.cache.outputs.cache-hit != 'true'
