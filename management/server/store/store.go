@@ -2,6 +2,7 @@ package store
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"fmt"
 	"net"
@@ -509,7 +510,9 @@ func createRandomDB(dsn string, db *gorm.DB, engine types.Engine) (string, func(
 		case types.PostgresStoreEngine:
 			err = db.Exec(fmt.Sprintf("DROP DATABASE %s WITH (FORCE)", dbName)).Error
 		case types.MysqlStoreEngine:
-			// err = killMySQLConnections(dsn, dbName)
+			if killErr := killMySQLConnections(dsn, dbName); killErr != nil {
+				log.Errorf("failed to kill connections of database %s: %v", dbName, killErr)
+			}
 			err = db.Exec(fmt.Sprintf("DROP DATABASE %s", dbName)).Error
 		}
 		if err != nil {
@@ -521,6 +524,28 @@ func createRandomDB(dsn string, db *gorm.DB, engine types.Engine) (string, func(
 	}
 
 	return replaceDBName(dsn, dbName), cleanup, nil
+}
+
+func killMySQLConnections(dsn, dbName string) error {
+	sqlDB, err := sql.Open("mysql", dsn+"?charset=utf8&parseTime=True&loc=Local")
+	if err != nil {
+		return err
+	}
+	defer sqlDB.Close()
+
+	rows, err := sqlDB.Query("SELECT id FROM information_schema.processlist WHERE db = ?", dbName)
+	if err != nil {
+		return err
+	}
+	defer rows.Close()
+
+	var id int
+	for rows.Next() {
+		if err = rows.Scan(&id); err == nil {
+			_, _ = sqlDB.Exec(fmt.Sprintf("KILL %d", id))
+		}
+	}
+	return rows.Err()
 }
 
 func replaceDBName(dsn, newDBName string) string {
