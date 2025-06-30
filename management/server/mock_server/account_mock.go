@@ -139,9 +139,8 @@ func (am *MockAccountManager) SyncAndMarkPeer(ctx context.Context, accountID str
 	return nil, nil, nil, status.Errorf(codes.Unimplemented, "method MarkPeerConnected is not implemented")
 }
 
-func (am *MockAccountManager) OnPeerDisconnected(_ context.Context, accountID string, peerPubKey string) error {
-	// TODO implement me
-	panic("implement me")
+func (am *MockAccountManager) OnPeerDisconnected(ctx context.Context, accountID string, peerPubKey string) error {
+	return am.MarkPeerConnected(ctx, peerPubKey, false, nil, accountID)
 }
 
 func (am *MockAccountManager) GetValidatedPeers(ctx context.Context, accountID string) (map[string]struct{}, error) {
