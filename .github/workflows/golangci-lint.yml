@@ -18,9 +18,9 @@ jobs:
         uses: actions/checkout@v4
       - name: Install codespell
         run: pip install codespell
-      - name: codespell
+      - name: Run codespell
         run: |
-          codespell --skip "go.mod,go.sum" \
+          python -m codespell --skip "go.mod,go.sum" \
             --ignore-words-list "erro,clienta,hastable,iif,groupd,testin,groupe" .
   golangci:
     strategy:
