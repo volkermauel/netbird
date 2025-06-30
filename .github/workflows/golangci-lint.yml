@@ -16,12 +16,11 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      - name: Install codespell
-        run: pip install codespell
       - name: codespell
-        run: |
-          codespell --skip "go.mod,go.sum" \
-            --ignore-words-list "erro,clienta,hastable,iif,groupd,testin,groupe" .
+        uses: codespell-project/actions-codespell@v2
+        with:
+          skip: go.mod,go.sum
+          ignore_words_list: erro,clienta,hastable,iif,groupd,testin,groupe
   golangci:
     strategy:
       fail-fast: false
