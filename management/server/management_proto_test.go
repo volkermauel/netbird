@@ -466,7 +466,13 @@ func startManagementForTest(t *testing.T, testFile string, config *types.Config)
 		}
 	}()
 
-	return s, accountManager, lis.Addr().String(), cleanup, nil
+	// extend cleanup to stop the ephemeral manager before removing the database
+	cleanupFn := func() {
+		ephemeralMgr.Stop()
+		cleanup()
+	}
+
+	return s, accountManager, lis.Addr().String(), cleanupFn, nil
 }
 
 func createRawClient(addr string) (mgmtProto.ManagementServiceClient, *grpc.ClientConn, error) {
